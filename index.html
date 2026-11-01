@@ -22,10 +22,11 @@ label{font-size:12px;color:#7d8898;display:block;margin-bottom:8px}
 #amt{width:100%;background:#0e1116;border:1px solid #26303d;border-radius:12px;color:#fff;
  font-size:30px;font-weight:700;text-align:center;padding:14px 10px;outline:none;letter-spacing:1px}
 #amt:focus{border-color:#3a4a5f}
-.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 4px}
-.q{background:#1f2731;border:none;color:#c8d3e0;font-size:13px;padding:10px 0;border-radius:10px;
- cursor:pointer;font-weight:600}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0 4px;max-height:46vh;overflow-y:auto;padding-right:2px}
+.q{background:#1f2731;border:none;color:#c8d3e0;font-size:13.5px;padding:9px 0;border-radius:9px;
+ cursor:pointer;font-weight:600;font-variant-numeric:tabular-nums}
 .q:active{background:#2b3644}
+.q.neg{color:#ff9e80}
 .btn{width:100%;margin-top:16px;border:none;border-radius:14px;color:#fff;font-size:18px;
  font-weight:700;padding:16px 0;cursor:pointer;letter-spacing:2px;transition:transform .08s}
 .btn:active{transform:scale(.985)}
@@ -53,16 +54,44 @@ input[type=range]{flex:1;accent-color:#1677ff}
 
 <div class="card">
   <label>金额（元）</label>
-  <input id="amt" value="100" inputmode="decimal" autocomplete="off">
+  <input id="amt" value="13320" inputmode="decimal" autocomplete="off">
   <div class="quick">
-    <button class="q" onclick="setAmt('0.01')">0.01</button>
-    <button class="q" onclick="setAmt('1')">1</button>
-    <button class="q" onclick="setAmt('8.88')">8.88</button>
-    <button class="q" onclick="setAmt('50')">50</button>
-    <button class="q" onclick="setAmt('88')">88</button>
-    <button class="q" onclick="setAmt('100')">100</button>
-    <button class="q" onclick="setAmt('520')">520</button>
-    <button class="q" onclick="setAmt('10000')">1万</button>
+    <button class="q" onclick="setAmt('13320')">13320</button>
+    <button class="q" onclick="setAmt('4900')">4900</button>
+    <button class="q" onclick="setAmt('26000')">26000</button>
+    <button class="q" onclick="setAmt('19800')">19800</button>
+    <button class="q" onclick="setAmt('12149')">12149</button>
+    <button class="q" onclick="setAmt('11520')">11520</button>
+    <button class="q" onclick="setAmt('12150')">12150</button>
+    <button class="q" onclick="setAmt('8820')">8820</button>
+    <button class="q" onclick="setAmt('16020')">16020</button>
+    <button class="q" onclick="setAmt('26800')">26800</button>
+    <button class="q neg" onclick="setAmt('-2144')">-2144</button>
+    <button class="q" onclick="setAmt('17820')">17820</button>
+    <button class="q" onclick="setAmt('44000')">44000</button>
+    <button class="q" onclick="setAmt('8820')">8820</button>
+    <button class="q" onclick="setAmt('12150')">12150</button>
+    <button class="q" onclick="setAmt('56672')">56672</button>
+    <button class="q" onclick="setAmt('18120')">18120</button>
+    <button class="q" onclick="setAmt('14400')">14400</button>
+    <button class="q" onclick="setAmt('14850')">14850</button>
+    <button class="q" onclick="setAmt('10620')">10620</button>
+    <button class="q" onclick="setAmt('10620')">10620</button>
+    <button class="q" onclick="setAmt('11520')">11520</button>
+    <button class="q" onclick="setAmt('14960')">14960</button>
+    <button class="q" onclick="setAmt('28135')">28135</button>
+    <button class="q" onclick="setAmt('5220')">5220</button>
+    <button class="q" onclick="setAmt('12150')">12150</button>
+    <button class="q" onclick="setAmt('5220')">5220</button>
+    <button class="q" onclick="setAmt('14400')">14400</button>
+    <button class="q" onclick="setAmt('11520')">11520</button>
+    <button class="q" onclick="setAmt('11520')">11520</button>
+    <button class="q" onclick="setAmt('11520')">11520</button>
+    <button class="q" onclick="setAmt('9720')">9720</button>
+    <button class="q" onclick="setAmt('8820')">8820</button>
+    <button class="q" onclick="setAmt('9720')">9720</button>
+    <button class="q" onclick="setAmt('9720')">9720</button>
+    <button class="q" onclick="setAmt('12150')">12150</button>
   </div>
   <button class="btn alipay" id="playBtn" onclick="play()">播 报</button>
   <div class="status" id="status">正在加载音频…</div>
@@ -172,14 +201,15 @@ var CN = ['零','一','二','三','四','五','六','七','八','九'];
 function intToCn(n){
   if (n === 0) return '零';
   var bigUnits = ['','万','亿','万亿'];
-  var s = '', ni = 0, part, ps, needZero;
+  var s = '', ni = 0, part, ps, needZero, lowVal = 0;
   while (n > 0 && ni < 16){
     part = n % 10000;
     if (part > 0){
-      ps = partToCn(part);
-      needZero = s && part < 1000;
+      ps = (part === 2 && ni > 0) ? '两' : partToCn(part);
+      needZero = s && lowVal > 0 && lowVal < 1000;   // 一万零一 / 一万两千（不补零）
       s = ps + bigUnits[ni] + (needZero ? '零' : '') + s;
     }
+    if (ni === 0) lowVal = part;
     n = Math.floor(n / 10000);
     ni++;
   }
@@ -197,11 +227,24 @@ function partToCn(part){
       if (started) zero = true;
     } else {
       if (zero) { out += '零'; zero = false; }
-      out += CN[d] + units[i];
+      out += ((d === 2 && i >= 2) ? '两' : CN[d]) + units[i];
       started = true;
     }
   }
   return out;
+}
+
+function cnText(str){
+  var parts = String(str == null ? '' : str).replace(/[^\d.]/g, '').split('.');
+  var ip = parseInt(parts[0], 10);
+  if (isNaN(ip)) ip = 0;
+  var out = intToCn(ip);
+  var dp = (parts[1] || '').replace(/0+$/, '');
+  if (dp){
+    out += '点';
+    for (var i = 0; i < dp.length; i++) out += CN[parseInt(dp.charAt(i), 10)];
+  }
+  return out + '元';
 }
 
 function amountToKeys(str){
@@ -211,7 +254,7 @@ function amountToKeys(str){
   var ip = parts[0] || '0';
   var dp = (parts[1] || '').slice(0,2);
   var keys = [], idx, ch;
-  var map = { '零':'0','一':'1','二':'2','三':'3','四':'4','五':'5',
+  var map = { '零':'0','一':'1','二':'2','两':'2','三':'3','四':'4','五':'5',
               '六':'6','七':'7','八':'8','九':'9',
               '十':'ten','百':'hundred','千':'thousand',
               '万':'ten_thousand','亿':'ten_million' };
@@ -301,8 +344,7 @@ function playNow(v){
 }
 
 function playWechat(v){
-  var n = parseFloat(v || '0');
-  var txt = '微信支付收款' + (isNaN(n) ? '0' : n.toFixed(2)) + '元';
+  var txt = '微信支付收款' + cnText(v);
 
   // 1) APK 内桥接（系统 TTS）
   if (window.PaySound && window.PaySound.speak){
